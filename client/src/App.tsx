@@ -20,14 +20,7 @@ function App() {
   const getData = async () => {
     const request = await fetch(API_URL);
     const response = await request.json();
-
-    /*  if (response.status === 406) {
-      setIsValidChain(false);
-      setData("Invalid Data");
-      setValidatedMessage(response.message);
-      return;
-    } */
-
+    
     if (response.status === 500) {
       setData("Technical problems please try again later");
       setValidatedMessage(response.message);
@@ -63,6 +56,7 @@ function App() {
       return;
     }
 
+    setValidatedMessage(response.message);
     await getData();
   };
 
@@ -140,14 +134,27 @@ function App() {
       }}
     >
       {validatedMessage && (
-        <div
-          style={{
-            color: isValidChain ? "green" : "red",
-            fontSize: "2rem",
-            fontWeight: "bold",
-          }}
-        >
-          {validatedMessage}
+        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+          <h3
+            style={{
+              color: isValidChain ? "green" : "red",
+              fontSize: "2rem",
+              fontWeight: "bold",
+            }}
+          >
+            {validatedMessage}
+          </h3>
+          <small
+            style={{
+              fontSize: "19px",
+              cursor: "pointer",
+              color: "blue",
+              marginTop: "10px",
+            }}
+            onClick={(e) => setValidatedMessage("")}
+          >
+            clear
+          </small>
         </div>
       )}
       <div>Saved Data</div>
