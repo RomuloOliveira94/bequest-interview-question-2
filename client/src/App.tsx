@@ -7,31 +7,33 @@ const API_URL = "http://localhost:8080";
 const BACKUP_KEY = "password";
 
 function App() {
-  const [data, setData] = useState<string>('');
+  const [data, setData] = useState<string>("");
   const [block, setBlock] = useState<Block>();
   const [validatedMessage, setValidatedMessage] = useState<string>();
   const [isValidChain, setIsValidChain] = useState<boolean>(true);
+  const [backupKey, setBackupKey] = useState<string>("");
 
   useEffect(() => {
     getData();
-  },[]);
+  }, []);
 
   const getData = async () => {
     const request = await fetch(API_URL);
-    const response = await request.json(); 
+    const response = await request.json();
 
-    if(response.status === 404) {
-      setIsValidChain(false); 
-      setData('Invalid Data');
+    /*  if (response.status === 406) {
+      setIsValidChain(false);
+      setData("Invalid Data");
+      setValidatedMessage(response.message);
+      return;
+    } */
+
+    if (response.status === 500) {
+      setData("Technical problems please try again later");
       setValidatedMessage(response.message);
       return;
     }
 
-    if(response.status === 500) {
-      setData('Technical problems please try again later');
-      setValidatedMessage(response.message);
-      return;
-    }
     setBlock(response.block);
     setData(response.block.data);
   };
@@ -48,25 +50,24 @@ function App() {
 
     const response = await request.json();
 
-    if(response.status === 404) {
-      setIsValidChain(false); 
-      setData('Invalid Data');
+    if (response.status === 406) {
+      setIsValidChain(false);
+      setData("Invalid Data");
       setValidatedMessage(response.message);
       return;
     }
 
-    if(response.status === 500) {
-      setData('Technical problems please try again later');
+    if (response.status === 500) {
+      setData("Technical problems please try again later");
       setValidatedMessage(response.message);
       return;
     }
-
 
     await getData();
   };
 
   const verifyData = async () => {
-   const request = await fetch(`${API_URL}/verify`, {
+    const request = await fetch(`${API_URL}/verify`, {
       method: "POST",
       body: JSON.stringify({ block }),
       headers: {
@@ -76,9 +77,9 @@ function App() {
     });
     const response = await request.json();
 
-    if(response.status === 404) {
-      setIsValidChain(false); 
-      setData('Invalid Data');
+    if (response.status === 406) {
+      setIsValidChain(false);
+      setData("Invalid Data");
       setValidatedMessage(response.message);
       return;
     }
@@ -89,6 +90,11 @@ function App() {
   };
 
   const restoreData = async () => {
+    if (backupKey !== BACKUP_KEY || !backupKey) {
+      setValidatedMessage("Invalid key");
+      return;
+    }
+
     const request = await fetch(`${API_URL}/restore`, {
       method: "POST",
       headers: {
@@ -98,19 +104,19 @@ function App() {
     });
     const response = await request.json();
 
-    if(response.status === 500) {
-      setData('Technical problems please try again later');
+    if (response.status === 500) {
+      setData("Technical problems please try again later");
       setValidatedMessage(response.message);
       return;
     }
 
-    if(request.status === 200) {
+    if (request.status === 200) {
       setValidatedMessage(response.message);
       setIsValidChain(true);
     }
 
     await getData();
-  }
+  };
 
   return (
     <div
@@ -127,6 +133,17 @@ function App() {
         fontSize: "30px",
       }}
     >
+      {validatedMessage && (
+        <div
+          style={{
+            color: isValidChain ? "green" : "red",
+            fontSize: "2rem",
+            fontWeight: "bold",
+          }}
+        >
+          {validatedMessage}
+        </div>
+      )}
       <div>Saved Data</div>
       <input
         style={{ fontSize: "30px" }}
@@ -134,7 +151,7 @@ function App() {
         value={data}
         onChange={(e) => setData(e.target.value)}
       />
-      
+
       <div style={{ display: "flex", gap: "10px" }}>
         <button style={{ fontSize: "20px" }} onClick={updateData}>
           Update Data
@@ -144,19 +161,30 @@ function App() {
         </button>
       </div>
 
-      {validatedMessage && <div>{validatedMessage}</div>}
-
       {!isValidChain && (
         <div>
-          <div style={{ display: "grid" }}>
-            <p style={{ textAlign: "center" }}>Calm down!</p>
-            <button type="button" style={{ fontSize: "20px" }} onClick={restoreData}>
-              Click here to restore your data
-            </button>
-          </div>  
+          <div style={{ display: "grid", gap: "8px" }}>
+            <div style={{ margin: "0 auto" }}>
+              <button
+                type="button"
+                style={{ fontSize: "20px" }}
+                onClick={restoreData}
+              >
+                Click here to restore your data
+              </button>
+            </div>
+            <div>
+              <label>Backup Key</label>
+              <input
+                style={{ fontSize: "30px" }}
+                type="text"
+                value={backupKey}
+                onChange={(e) => setBackupKey(e.target.value)}
+              />
+            </div>
+          </div>
         </div>
       )}
-
     </div>
   );
 }
