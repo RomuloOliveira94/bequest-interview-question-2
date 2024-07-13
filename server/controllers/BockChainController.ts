@@ -22,3 +22,23 @@ export const addBlock = (req: Request, res: Response): void => {
     const newBlock = blockchainService.getLatestBlock();
     res.json({ message: 'Data updated Sucefully', block: newBlock });
 };
+
+export const verifyChain = (req: Request, res: Response): void => {
+    const { block } = req.body;
+
+    if(!block) {
+        res.status(400).json({ message: 'Block is required' });
+        return;
+    }
+
+    if(blockchainService.isValidChain() === false) {
+        blockchainService.restoreChain();
+    }
+
+    if(!blockchainService.isValidChain()) {
+        res.status(500).json({ message: 'Invalid Data' });
+        return;
+    }
+
+    res.status(200).json({ message: 'Valid Data' });
+}

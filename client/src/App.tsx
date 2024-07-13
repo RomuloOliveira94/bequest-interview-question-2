@@ -1,18 +1,22 @@
 import React, { useEffect, useState } from "react";
+import { Block } from "./types/types";
 
 const API_URL = "http://localhost:8080";
 
 function App() {
   const [data, setData] = useState<string>('');
+  const [block, setBlock] = useState<Block>();
+  const [validatedMessage, setValidatedMessage] = useState<string>();
 
   useEffect(() => {
     getData();
-  }, []);
+  },[]);
 
   const getData = async () => {
     const response = await fetch(API_URL);
-    const { data } = await response.json(); 
-    setData(data);
+    const block = await response.json(); 
+    setBlock(block);
+    setData(block.data);
   };
 
   const updateData = async () => {
@@ -24,12 +28,28 @@ function App() {
         "Content-Type": "application/json",
       },
     });
-
     await getData();
   };
 
   const verifyData = async () => {
-    throw new Error("Not implemented");
+   const request = await fetch(`${API_URL}/verify`, {
+      method: "POST",
+      body: JSON.stringify({ block }),
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    });
+    const response = await request.json();
+
+    if(response.message === 'Invalid Data') {
+      setValidatedMessage('Invalid Data');
+      return;
+    }
+
+    setValidatedMessage(response.message);
+
+    await getData();
   };
 
   return (
@@ -63,6 +83,8 @@ function App() {
           Verify Data
         </button>
       </div>
+
+      {validatedMessage && <div>{validatedMessage}</div>}
     </div>
   );
 }
