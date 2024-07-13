@@ -10,7 +10,6 @@ function App() {
   const [data, setData] = useState<string>('');
   const [block, setBlock] = useState<Block>();
   const [validatedMessage, setValidatedMessage] = useState<string>();
-  const [tamperedBlock, setTamperedBlock] = useState<Block>();
   const [isValidChain, setIsValidChain] = useState<boolean>(true);
 
   useEffect(() => {
@@ -18,21 +17,27 @@ function App() {
   },[]);
 
   const getData = async () => {
-    const response = await fetch(API_URL);
-    const block = await response.json(); 
-    if(block.message === 'Invalid Data') {
+    const request = await fetch(API_URL);
+    const response = await request.json(); 
+
+    if(response.status === 404) {
       setIsValidChain(false); 
-      setData(block.block.data);
-      setTamperedBlock(block.block.data);
-      setValidatedMessage(block.message);
+      setData('Invalid Data');
+      setValidatedMessage(response.message);
       return;
     }
-    setBlock(block);
-    setData(block.data);
+
+    if(response.status === 500) {
+      setData('Technical problems please try again later');
+      setValidatedMessage(response.message);
+      return;
+    }
+
+    setData(response.data);
   };
 
   const updateData = async () => {
-    await fetch(API_URL, {
+    const request = await fetch(API_URL, {
       method: "POST",
       body: JSON.stringify({ data }),
       headers: {
@@ -40,6 +45,23 @@ function App() {
         "Content-Type": "application/json",
       },
     });
+
+    const response = await request.json();
+
+    if(response.status === 404) {
+      setIsValidChain(false); 
+      setData('Invalid Data');
+      setValidatedMessage(response.message);
+      return;
+    }
+
+    if(response.status === 500) {
+      setData('Technical problems please try again later');
+      setValidatedMessage(response.message);
+      return;
+    }
+
+
     await getData();
   };
 
@@ -54,11 +76,10 @@ function App() {
     });
     const response = await request.json();
 
-    if(response.message === 'Tampered data detected') {
-      console.log(response.block)
+    if(response.status === 404) {
+      setIsValidChain(false); 
+      setData('Invalid Data');
       setValidatedMessage(response.message);
-      setTamperedBlock(response.block.data);
-      setIsValidChain(false);
       return;
     }
 
@@ -77,16 +98,16 @@ function App() {
     });
     const response = await request.json();
 
-    if(request.status === 500) {
+    if(response.status === 500) {
+      setData('Technical problems please try again later');
       setValidatedMessage(response.message);
       return;
     }
 
     if(request.status === 200) {
       setValidatedMessage(response.message);
+      setIsValidChain(true);
     }
-
-
 
     await getData();
   }

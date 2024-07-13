@@ -6,7 +6,7 @@ export const getBlockchain = (req: Request, res: Response): void => {
 
   try {
     if (blockchainService.isValidChain() === false) {
-      res.status(500).json({
+      res.status(404).json({
         message: "Invalid Data"
       });
       return;
@@ -29,7 +29,7 @@ export const addBlock = (req: Request, res: Response): void => {
   }
 
   if (blockchainService.isValidChain() === false) {
-    res.status(500).json({ message: "Your data is invalid" });
+    res.status(404).json({ message: "Invalid data" });
     return;
   }
 
@@ -49,9 +49,8 @@ export const verifyChain = (req: Request, res: Response): void => {
     const validate = blockchainService.isValidChain();
 
     if (validate === false) {
-      res.status(500).json({
-        message: "Tampered data detected",
-        block: blockchainService.detectTampering(),
+      res.status(404).json({
+        message: "Tampered data detected"
       });
       return;
     }
@@ -67,10 +66,6 @@ export const restoreChain = (req: Request, res: Response): void => {
 
   try {
     blockchainService.restoreChain();
-    if (blockchainService.isValidChain() === false) {
-      res.status(500).json({ message: "Invalid Data" });
-      return;
-    }
     res.status(200).json({ message: "Data restored successfully" });
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error", error });
