@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { Block } from '../models/Block';
 import { BackupBlockchainService } from './BackupBlockchainService';
-import { blockchainFilePath } from '../shared/consts';
+import { backupFilePath, blockchainFilePath } from '../shared/consts';
 
 export class BlockchainService{
 
@@ -21,20 +21,25 @@ export class BlockchainService{
         }
     }
 
-    getLatestBlock() {
-        if(!this.isValidChain()) {
-            this.restoreChain();
+    private saveBlockchainOnDb(): void {
+        try {
+            fs.writeFileSync(blockchainFilePath, JSON.stringify(this.chain));
+            BackupBlockchainService.createBackup(this.chain);
+            console.log('Blockchain saved successfully');
+        } catch (error) {
+            console.error('Error to save blockchain', error);
         }
+    }
 
-        return this.chain[0];
+    getLatestBlock() {
+        return this.chain[this.chain.length - 1];
     }
 
     addBlock(data: string) {
-        if(!this.isValidChain()) {
-            this.restoreChain();
-        }        
+        if(!this.isValidChain()) this.restoreChain();   
         const newBlock = Block.next(this.chain[this.chain.length - 1], data);
         this.chain.push(newBlock);
+        this.saveBlockchainOnDb();
     }
 
     isValidChain() {
@@ -42,7 +47,6 @@ export class BlockchainService{
         if (JSON.stringify(this.chain[0]) !== JSON.stringify(Block.genesis())) {
             return false;
         }
-
         if (this.chain.length === 1) return true;
 
         for (let i = 1; i < this.chain.length; i++) {
