@@ -56,7 +56,7 @@ export class Block {
         } else if (Block.calculateHash(currentBlock.index, currentBlock.timestamp, currentBlock.data, currentBlock.previousHash) !== currentBlock.hash) {
             console.log('Invalid hash');
             return false;
-        }
+        } 
 
         return true;
     }

@@ -35,8 +35,7 @@ export class BlockchainService{
         return this.chain[this.chain.length - 1];
     }
 
-    addBlock(data: string) {
-        if(!this.isValidChain()) this.restoreChain();   
+    addBlock(data: string) {   
         const newBlock = Block.next(this.chain[this.chain.length - 1], data);
         this.chain.push(newBlock);
         this.saveBlockchainOnDb();
