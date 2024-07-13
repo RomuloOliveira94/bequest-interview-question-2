@@ -41,8 +41,11 @@ export class BlockchainService{
         this.saveBlockchainOnDb();
     }
 
-    isValidChain() {
+    isValidChain(latestBlock: Block = this.getLatestBlock()) {
         if(!this.chain.length) return false;
+        if(this.getLatestBlock().hash !== latestBlock.hash) {
+            return false;
+        }
         if (JSON.stringify(this.chain[0]) !== JSON.stringify(Block.genesis())) {
             return false;
         }

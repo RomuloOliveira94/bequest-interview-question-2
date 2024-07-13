@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { BlockchainService } from "../services/BlockchainService";
+import { stat } from "fs";
 
 export const getBlockchain = (req: Request, res: Response): void => {
   const blockchainService = new BlockchainService();
@@ -7,14 +8,16 @@ export const getBlockchain = (req: Request, res: Response): void => {
   try {
     if (blockchainService.isValidChain() === false) {
       res.status(404).json({
-        message: "Invalid Data"
+        message: "Invalid Data",
+        block: blockchainService.getLatestBlock(),
+        status: 404
       });
       return;
     }
 
-    res.status(200).json(blockchainService.getLatestBlock());
+    res.status(200).json({block: blockchainService.getLatestBlock(), status: 200});
   } catch (error) {
-    res.status(500).json({ message: "Internal Server Error!", error });
+    res.status(500).json({ message: "Internal Server Error!", status: 500 });
     return;
   }
 };
@@ -24,40 +27,43 @@ export const addBlock = (req: Request, res: Response): void => {
   const { data } = req.body;
 
   if (!data) {
-    res.status(400).json({ message: "Data is required" });
+    res.status(400).json({ message: "Data is required", status: 400 });
     return;
   }
 
   if (blockchainService.isValidChain() === false) {
-    res.status(404).json({ message: "Invalid data" });
+    res.status(404).json({ message: "Invalid data", status: 404 });
     return;
   }
 
   try {
     blockchainService.addBlock(data);
     const newBlock = blockchainService.getLatestBlock();
-    res.json({ message: "Data updated Sucefully", block: newBlock });
+    res.json({ message: "Data updated Sucefully", block: newBlock, status: 200 });
   } catch (error) {
-    res.status(500).json({ message: "Internal Server Error", error });
+    res.status(500).json({ message: "Internal Server Error", status: 500 });
   }
 };
 
 export const verifyChain = (req: Request, res: Response): void => {
+    const { data } = req.body;
+
   const blockchainService = new BlockchainService();
 
   try {
-    const validate = blockchainService.isValidChain();
+    const validate = blockchainService.isValidChain(data);
 
     if (validate === false) {
       res.status(404).json({
-        message: "Tampered data detected"
+        message: "Invalid Data",
+        status: 404
       });
       return;
     }
 
-    res.status(200).json({ message: "Your data is valid!" });
+    res.status(200).json({ message: "Your data is valid!", status: 200 });
   } catch (error) {
-    res.status(500).json({ message: "Internal Server Error", error });
+    res.status(500).json({ message: "Internal Server Error", status: 500 });
   }
 };
 
@@ -66,8 +72,8 @@ export const restoreChain = (req: Request, res: Response): void => {
 
   try {
     blockchainService.restoreChain();
-    res.status(200).json({ message: "Data restored successfully" });
+    res.status(200).json({ message: "Data restored successfully", status: 200 });
   } catch (error) {
-    res.status(500).json({ message: "Internal Server Error", error });
+    res.status(500).json({ message: "Internal Server Error", status: 500 });
   }
 };

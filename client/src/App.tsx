@@ -32,8 +32,8 @@ function App() {
       setValidatedMessage(response.message);
       return;
     }
-
-    setData(response.data);
+    setBlock(response.block);
+    setData(response.block.data);
   };
 
   const updateData = async () => {
