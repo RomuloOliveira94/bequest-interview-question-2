@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 const API_URL = "http://localhost:8080";
 
 function App() {
-  const [data, setData] = useState<string>();
+  const [data, setData] = useState<string>('');
 
   useEffect(() => {
     getData();
@@ -54,7 +54,7 @@ function App() {
         value={data}
         onChange={(e) => setData(e.target.value)}
       />
-
+      
       <div style={{ display: "flex", gap: "10px" }}>
         <button style={{ fontSize: "20px" }} onClick={updateData}>
           Update Data
