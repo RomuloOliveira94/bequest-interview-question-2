@@ -40,7 +40,7 @@ function App() {
 
     const response = await request.json();
 
-    if (response.status === 406) {
+    if (response.status === 409) {
       setIsValidChain(false);
       setData("Invalid Data");
       setValidatedMessage(response.message);
@@ -68,7 +68,7 @@ function App() {
     });
     const response = await request.json();
 
-    if (response.status === 406) {
+    if (response.status === 409) {
       setIsValidChain(false);
       setData("Invalid Data");
       setValidatedMessage(response.message);

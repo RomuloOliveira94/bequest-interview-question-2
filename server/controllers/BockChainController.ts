@@ -30,7 +30,7 @@ export const addBlock = (req: Request, res: Response): void => {
   }
 
   if (blockchainService.isValidChain(previousHash) === false) {
-    res.status(406).json({ message: "Data Tampered", status: 406 });
+    res.status(409).json({ message: "Data Tampered", status: 409 });
     return;
   }
 
@@ -57,9 +57,9 @@ export const verifyChain = (req: Request, res: Response): void => {
     const validate = blockchainService.isValidChain(block.hash);
 
     if (validate === false) {
-      res.status(406).json({
+      res.status(409).json({
         message: "Data Tampered",
-        status: 406,
+        status: 409,
       });
       return;
     }
