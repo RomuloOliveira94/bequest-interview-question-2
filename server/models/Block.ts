@@ -18,7 +18,7 @@ export class Block {
     }
 
     static genesis() {
-        return new Block(0, '0', '0', '0', '0');
+        return new Block(0, '0', 'Genesis Block', '0', '0');
     }
 
     static isValidStructure(block: Block) {
@@ -31,7 +31,7 @@ export class Block {
 
     static next(previousBlock: Block, data: string) {
         const index = previousBlock.index + 1;
-        const timestamp = Date.now().toString();
+        const timestamp = new Date().toISOString();
         const previousHash = previousBlock.hash;
         const hash = Block.calculateHash(index, timestamp, data, previousHash);
         return new Block(index, timestamp, data, previousHash, hash);
@@ -41,19 +41,19 @@ export class Block {
         return crypto.createHash('sha256').update(index + timestamp + JSON.stringify(data) + previousHash).digest('hex');
     }
 
-    static isValidNewBlock(newBlock: Block, previousBlock: Block) {
-        if (!Block.isValidStructure(newBlock)) {
+    static isValidBlock(currentBlock: Block, previousBlock: Block) {
+        if (!Block.isValidStructure(currentBlock)) {
             console.log('Invalid structure');
             return false;
         }
 
-        if (previousBlock.index + 1 !== newBlock.index) {
+        if (previousBlock.index + 1 !== currentBlock.index) {
             console.log('Invalid index');
             return false;
-        } else if (previousBlock.hash !== newBlock.previousHash) {
+        } else if (previousBlock.hash !== currentBlock.previousHash) {
             console.log('Invalid previous hash');
             return false;
-        } else if (Block.calculateHash(newBlock.index, newBlock.timestamp, newBlock.data, newBlock.previousHash) !== newBlock.hash) {
+        } else if (Block.calculateHash(currentBlock.index, currentBlock.timestamp, currentBlock.data, currentBlock.previousHash) !== currentBlock.hash) {
             console.log('Invalid hash');
             return false;
         }
