@@ -1,19 +1,10 @@
 import { Request, Response } from "express";
 import { BlockchainService } from "../services/BlockchainService";
-import { BackupBlockchainService } from "../services/BackupBlockchainService";
 
 export const getBlockchain = (req: Request, res: Response): void => {
   const blockchainService = new BlockchainService();
 
   try {
-    /* if (blockchainService.isValidChain() === false) {
-      res.status(406).json({
-        message: "Invalid Data",
-        status: 406
-      });
-      return;
-    } */
-
     res
       .status(200)
       .json({ block: blockchainService.getLatestBlock(), status: 200 });
