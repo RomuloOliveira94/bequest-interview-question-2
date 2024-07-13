@@ -11,7 +11,7 @@ function App() {
 
   const getData = async () => {
     const response = await fetch(API_URL);
-    const { data } = await response.json();
+    const { data } = await response.json(); 
     setData(data);
   };
 

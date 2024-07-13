@@ -1,14 +1,12 @@
 import { Request, Response } from 'express';
 import { BlockchainService } from '../services/BlockchainService';
-import { BackupBlockchainService } from '../services/BackupBlockchainService';
-import { Block } from '../models/Block';
 
 const blockchainService = new BlockchainService();
 
 export const getBlockchain = (req: Request, res: Response): void => {
     try {
-        res.status(200).json({ blockchain: blockchainService.getLatestBlock()});
-    } catch (error) {
+        res.status(200).json(blockchainService.getLatestBlock());
+    } catch (error: any) {
         res.status(500).json({ message: 'Erro ao buscar a blockchain.', error: error.message });
     }
 };

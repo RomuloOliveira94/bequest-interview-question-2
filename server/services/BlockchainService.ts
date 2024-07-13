@@ -1,8 +1,7 @@
-import * as fs from 'fs';
+import fs from 'fs';
 import { Block } from '../models/Block';
 import { BackupBlockchainService } from './BackupBlockchainService';
-
-const blockchainFilePath = './src/data/blockchain.json';
+import { blockchainFilePath } from '../shared/consts';
 
 export class BlockchainService{
 
@@ -23,30 +22,34 @@ export class BlockchainService{
     }
 
     getLatestBlock() {
-        if(!this.checkBlockChainIntegrity()){
+        if(!this.isValidChain()) {
             this.restoreChain();
         }
-        return this.chain[this.chain.length - 1];
+
+        return this.chain[0];
     }
 
     addBlock(data: string) {
-        if(!this.isValidChain(this.chain)){
+        if(!this.isValidChain()) {
             this.restoreChain();
         }        
         const newBlock = Block.next(this.chain[this.chain.length - 1], data);
         this.chain.push(newBlock);
     }
 
-    isValidChain(chain: any[]) {
-        if (JSON.stringify(chain[0]) !== JSON.stringify(Block.genesis())) {
+    isValidChain() {
+        if(!this.chain.length) return false;
+        if (JSON.stringify(this.chain[0]) !== JSON.stringify(Block.genesis())) {
             return false;
         }
 
-        for (let i = 1; i < chain.length; i++) {
-            const block = chain[i];
-            const previousBlock = chain[i - 1];
+        if (this.chain.length === 1) return true;
 
-            if (!Block.isValidNewBlock(block, previousBlock)) {
+        for (let i = 1; i < this.chain.length; i++) {
+            const block = this.chain[i];
+            const previousBlock = this.chain[i - 1];
+
+            if (!Block.isValidBlock(block, previousBlock)) {
                 return false;
             }
         }
@@ -54,24 +57,7 @@ export class BlockchainService{
         return true;
     }
 
-    replaceChain(newChain: any[]) {
-        if (newChain.length <= this.chain.length) {
-            console.log('Received chain is not longer than the current chain.');
-            return;
-        } else if (!this.isValidChain(newChain)) {
-            console.log('The received chain is not valid.');
-            return;
-        }
-
-        console.log('Replacing blockchain with the new chain.');
-        this.chain = newChain;
-    }
-
-    private restoreChain() {
+    restoreChain() {
         this.chain = BackupBlockchainService.restoreBackup();
-    }
-
-    private checkBlockChainIntegrity() {
-        return this.isValidChain(this.chain);
     }
 }

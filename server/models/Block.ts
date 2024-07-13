@@ -18,7 +18,7 @@ export class Block {
     }
 
     static genesis() {
-        return new Block(0, '0', 'Genesis Block', '0', '0');
+        return new Block(0, '0', 'Genesis', '0', '0');
     }
 
     static isValidStructure(block: Block) {
