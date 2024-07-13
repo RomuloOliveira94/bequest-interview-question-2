@@ -31,7 +31,12 @@ export class BlockchainService {
   }
 
   getLatestBlock() {
-    return this.chain[this.chain.length - 1] || Block.genesis();
+    if (!this.chain.length) {
+      this.chain.push(Block.genesis());
+      this.saveBlockchainOnDb();
+      return Block.genesis();
+    }
+    return this.chain[this.chain.length - 1];
   }
 
   addBlock(data: string) {
