@@ -3,12 +3,9 @@ import { Block } from "./types/types";
 
 const API_URL = "http://localhost:8080";
 
-//user has a backup key for any case
-const BACKUP_KEY = "123456";
-
 function App() {
   const [data, setData] = useState<string>("");
-  const [block, setBlock] = useState<Block>();
+  const [block, setBlock] = useState<Block | null >(null);
   const [validatedMessage, setValidatedMessage] = useState<string>();
   const [isValidChain, setIsValidChain] = useState<boolean>(true);
   const [backupKey, setBackupKey] = useState<string>("");
@@ -20,7 +17,7 @@ function App() {
   const getData = async () => {
     const request = await fetch(API_URL);
     const response = await request.json();
-    
+
     if (response.status === 500) {
       setData("Technical problems please try again later");
       setValidatedMessage(response.message);
@@ -34,7 +31,7 @@ function App() {
   const updateData = async () => {
     const request = await fetch(API_URL, {
       method: "POST",
-      body: JSON.stringify({ data }),
+      body: JSON.stringify({ newData: data, previousHash: block?.hash }),
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
@@ -84,11 +81,6 @@ function App() {
   };
 
   const restoreData = async () => {
-    if (backupKey !== BACKUP_KEY || !backupKey) {
-      setValidatedMessage("Invalid key");
-      return;
-    }
-
     const request = await fetch(`${API_URL}/restore`, {
       method: "POST",
       body: JSON.stringify({ backupKey }),
