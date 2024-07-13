@@ -4,7 +4,7 @@ import { Block } from "./types/types";
 const API_URL = "http://localhost:8080";
 
 //user has a backup key for any case
-const BACKUP_KEY = "password";
+const BACKUP_KEY = "123456";
 
 function App() {
   const [data, setData] = useState<string>("");
@@ -97,6 +97,7 @@ function App() {
 
     const request = await fetch(`${API_URL}/restore`, {
       method: "POST",
+      body: JSON.stringify({ backupKey }),
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
@@ -107,6 +108,11 @@ function App() {
     if (response.status === 500) {
       setData("Technical problems please try again later");
       setValidatedMessage(response.message);
+      return;
+    }
+
+    if (response.status === 401) {
+      setValidatedMessage("Key not valid");
       return;
     }
 
@@ -177,7 +183,7 @@ function App() {
               <label>Backup Key</label>
               <input
                 style={{ fontSize: "30px" }}
-                type="text"
+                type="password"
                 value={backupKey}
                 onChange={(e) => setBackupKey(e.target.value)}
               />

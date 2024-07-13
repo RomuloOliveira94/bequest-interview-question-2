@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { Block } from '../models/Block';
 import { BackupBlockchainService } from './BackupBlockchainService';
-import { backupFilePath, blockchainFilePath } from '../shared/consts';
+import { blockchainFilePath } from '../shared/consts';
 
 export class BlockchainService{
 
@@ -65,5 +65,9 @@ export class BlockchainService{
 
     restoreChain() {
         this.chain = BackupBlockchainService.restoreBackup();
+    }
+
+    checkBackupKey(backupKey: string): boolean {
+        return BackupBlockchainService.checkBackupKey(backupKey);
     }
 }

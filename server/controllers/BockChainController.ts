@@ -1,19 +1,18 @@
 import { Request, Response } from "express";
 import { BlockchainService } from "../services/BlockchainService";
-import { stat } from "fs";
+import { BackupBlockchainService } from "../services/BackupBlockchainService";
 
 export const getBlockchain = (req: Request, res: Response): void => {
   const blockchainService = new BlockchainService();
 
   try {
-    if (blockchainService.isValidChain() === false) {
-      res.status(404).json({
+    /* if (blockchainService.isValidChain() === false) {
+      res.status(406).json({
         message: "Invalid Data",
-        block: blockchainService.getLatestBlock(),
-        status: 404
+        status: 406
       });
       return;
-    }
+    } */
 
     res.status(200).json({block: blockchainService.getLatestBlock(), status: 200});
   } catch (error) {
@@ -32,7 +31,7 @@ export const addBlock = (req: Request, res: Response): void => {
   }
 
   if (blockchainService.isValidChain() === false) {
-    res.status(404).json({ message: "Invalid data", status: 404 });
+    res.status(406).json({ message: "Invalid data", status: 406 });
     return;
   }
 
@@ -54,9 +53,9 @@ export const verifyChain = (req: Request, res: Response): void => {
     const validate = blockchainService.isValidChain(data);
 
     if (validate === false) {
-      res.status(404).json({
+      res.status(406).json({
         message: "Invalid Data",
-        status: 404
+        status: 406
       });
       return;
     }
@@ -68,7 +67,14 @@ export const verifyChain = (req: Request, res: Response): void => {
 };
 
 export const restoreChain = (req: Request, res: Response): void => {
+    const { backupKey } = req.body;
+
   const blockchainService = new BlockchainService();
+
+  if(!backupKey || backupKey !== blockchainService.checkBackupKey(backupKey)) {
+    res.status(401).json({ message: "Unauthorized", status: 401 });
+    return;
+  }
 
   try {
     blockchainService.restoreChain();

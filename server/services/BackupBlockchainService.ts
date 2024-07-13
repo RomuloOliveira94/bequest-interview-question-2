@@ -24,5 +24,14 @@ export class BackupBlockchainService {
             return [];
         }
     }
+
+    public static checkBackupKey(backupKey: string): boolean { 
+        //check the backup key, in a real scenario this should be more complex, like a hash   
+        if (backupKey === '123456') {
+            return true;
+        }
+        return false;
+    }
+
     
 }
