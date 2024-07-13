@@ -31,7 +31,7 @@ export class Block {
 
     static next(previousBlock: Block, data: string) {
         const index = previousBlock.index + 1;
-        const timestamp = new Date().toISOString();
+        const timestamp = Date.now().toString();
         const previousHash = previousBlock.hash;
         const hash = Block.calculateHash(index, timestamp, data, previousHash);
         return new Block(index, timestamp, data, previousHash, hash);
