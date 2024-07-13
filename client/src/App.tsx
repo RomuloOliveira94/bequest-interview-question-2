@@ -3,10 +3,15 @@ import { Block } from "./types/types";
 
 const API_URL = "http://localhost:8080";
 
+//user has a backup key for any case
+const BACKUP_KEY = "password";
+
 function App() {
   const [data, setData] = useState<string>('');
   const [block, setBlock] = useState<Block>();
   const [validatedMessage, setValidatedMessage] = useState<string>();
+  const [tamperedBlock, setTamperedBlock] = useState<Block>();
+  const [isValidChain, setIsValidChain] = useState<boolean>(true);
 
   useEffect(() => {
     getData();
@@ -15,6 +20,13 @@ function App() {
   const getData = async () => {
     const response = await fetch(API_URL);
     const block = await response.json(); 
+    if(block.message === 'Invalid Data') {
+      setIsValidChain(false); 
+      setData(block.block.data);
+      setTamperedBlock(block.block.data);
+      setValidatedMessage(block.message);
+      return;
+    }
     setBlock(block);
     setData(block.data);
   };
@@ -42,8 +54,11 @@ function App() {
     });
     const response = await request.json();
 
-    if(response.message === 'Invalid Data') {
-      setValidatedMessage('Invalid Data');
+    if(response.message === 'Tampered data detected') {
+      console.log(response.block)
+      setValidatedMessage(response.message);
+      setTamperedBlock(response.block.data);
+      setIsValidChain(false);
       return;
     }
 
@@ -51,6 +66,30 @@ function App() {
 
     await getData();
   };
+
+  const restoreData = async () => {
+    const request = await fetch(`${API_URL}/restore`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    });
+    const response = await request.json();
+
+    if(request.status === 500) {
+      setValidatedMessage(response.message);
+      return;
+    }
+
+    if(request.status === 200) {
+      setValidatedMessage(response.message);
+    }
+
+
+
+    await getData();
+  }
 
   return (
     <div
@@ -85,6 +124,18 @@ function App() {
       </div>
 
       {validatedMessage && <div>{validatedMessage}</div>}
+
+      {!isValidChain && (
+        <div>
+          <div style={{ display: "grid" }}>
+            <p style={{ textAlign: "center" }}>Calm down!</p>
+            <button type="button" style={{ fontSize: "20px" }} onClick={restoreData}>
+              Click here to restore your data
+            </button>
+          </div>  
+        </div>
+      )}
+
     </div>
   );
 }
