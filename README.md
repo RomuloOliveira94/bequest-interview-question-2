@@ -5,9 +5,11 @@ I implemented a simple blockchain algorithm to make this data immutable. Using t
 I've used mock data, but in the real world security layers (like authentication and secure key hashes) would obviously be implemented and the backup would be on some secure cloud platform or datacenter.
 
 **1. How does the client ensure that their data has not been tampered with?**
+</br>
 a. The client can consult the blockchain's verification route at any time to check the integrity of the data.
 </br>
 **2. If the data has been tampered with, how can the client recover the lost data?**
+</br>
 a. Whenever a new block is created when the user updates the data (or periodically), the entire blockchain will be backed up and the user can restore it using the backup.
 
 The implementation is simple but answers the questions by keeping the data immutable and secure against intrusions into the database and server.
